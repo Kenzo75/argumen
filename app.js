@@ -1,37 +1,3 @@
-// const fs = require("fs");
-
-// const args = process.argv.slice(2);
-// const action = args[0];
-
-// if (action === "tambah") {
-//     if (args.length < 5) {
-//         console.log("Format salah! Gunakan: node app tambah <nama> <nohp> <email> <alamat>");
-//         process.exit(1);
-//     }
-
-//     const nama = args[1];
-//     const nohp = args[2];
-//     const email = args[3];
-//     const alamat = args[4];
-
-//     const newData = { nama, nohp, email, alamat };
-
-//     let data = [];
-//     if (fs.existsSync("data.json")) {
-//         const fileContent = fs.readFileSync("data.json", "utf-8");
-//         data = JSON.parse(fileContent);
-//     }
-
-//     // Tambahkan data baru
-//     data.push(newData);
-
-//     fs.writeFileSync("data.json", JSON.stringify(data, null, 2));
-
-//     console.log("Data berhasil ditambahkan!");
-// } else {
-//     console.log("Perintah tidak dikenali! Gunakan: node app tambah <nama> <nohp> <email> <alamat>");
-// }
-
 const contacts = require(`./contacts`);
 const yargs = require("yargs");
 
@@ -57,6 +23,60 @@ yargs
         },
     })
     .help()
+    .demandCommand()
     .argv;
 
+yargs
+    .command({
+        command: `list`,
+        describe: `Menampilkan kontak`,
+        handler() {
+            contacts.listContact();
+        }
+    })
+
+yargs
+    .command({
+        command: `detail`,
+        describe: `Menampilkan Detail Data`,
+        builder: {
+            nama: { describe: "Nama kontak", demandOption: true, type: "string" },
+        },
+        handler(argv) {
+            contacts.detailContact(argv.nama)
+        },
+    })
+
+yargs
+    .command({
+        command: `hapus`,
+        describe: `Menghapus Data`,
+        builder: {
+            nama: { describe: "Nama kontak", demandOption: true, type: "string" },
+        },
+        handler(argv) {
+            contacts.hapusContact(argv.nama)
+        },
+    })
+yargs
+    .command({
+        command: "update",
+        describe: "Memperbarui kontak",
+        builder: {
+            nama: { describe: "Nama kontak yang ingin diperbarui", demandOption: true, type: "string" },
+            nohp: { describe: "Nomor HP baru", type: "string" },
+            email: { describe: "Email baru", type: "string" },
+            alamat: { describe: "Alamat baru", type: "string" },
+        },
+        handler(argv) {
+            const newData = {};
+            if (argv.nohp) newData.nohp = argv.nohp;
+            if (argv.email) newData.email = argv.email;
+            if (argv.alamat) newData.alamat = argv.alamat;
+
+            contacts.updateContact(argv.nama, newData);
+        },
+    });
+
 yargs.parse();
+
